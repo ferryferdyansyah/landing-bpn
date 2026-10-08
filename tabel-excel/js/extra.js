@@ -261,10 +261,11 @@ function excel17(wb, ws, d, ex) {
 // =====================================================================
 // ---------- PENGATURAN (edit di sini) ----------
 // IV-15: 2 jenis arahan Tanaman Pangan. 'key' = kata yang HARUS ada di teks V_ARAHAN (huruf kecil, tidak peka besar/kecil).
-const ARAHAN_PANGAN = [
-  { label: 'Tersedia untuk Tanaman Pangan dalam rangka optimalisasi penggunaan tanah', key: ['tanaman pangan', 'optimalisasi'] },
-  { label: 'Tersedia untuk Tanaman Pangan sesuai tata ruang', key: ['tanaman pangan', 'tata ruang'] }
-];
+// IV-15: semua nilai V_ARAHAN yang mengandung SALAH SATU kata kunci di bawah dianggap potensi pertanian pangan
+// (1 baris per nilai V_ARAHAN). Huruf kecil, tidak peka besar/kecil. Tambah kata kunci bila istilah RTRW/RDTR daerah berbeda.
+// Nilai V_ARAHAN yang diawali "tidak tersedia" tidak pernah dihitung.
+const KEY_PANGAN = ['pangan', 'sawah', 'padi', 'palawija', 'hortikultura', 'lp2b', 'kp2b', 'lahan basah', 'tegalan', 'ladang', 'semusim', 'lumbung', 'pertanian'];
+const isPangan = a => { const t = norm(a); return !t.startsWith('tidak tersedia') && KEY_PANGAN.some(k => t.includes(k)) };
 // IV-16: kelompok potensi sektor lain. Semua V_ARAHAN yang mengandung 'key' dimasukkan ke kelompok itu (1 baris per nilai V_ARAHAN).
 // const SEKTOR_LAIN = [
 //   { name: 'Potensi Perumahan', key: 'perumahan' },
@@ -282,10 +283,11 @@ const ARAHAN_PANGAN = [
 //   { name: 'Potensi Pertahanan dan Keamanan', key: 'pertahanan' }
 // ];
 const SEKTOR_LAIN = [
-  { name: 'Potensi Pengembangan Sektor Perkebunan', key: 'perkebunan' },
-  { name: 'Potensi Pengembangan Sektor Perumahan', key: 'perumahan' },
-  { name: 'Potensi Pengembangan Sektor Industri', key: 'industri' },
-  { name: 'Potensi Pengembangan Sektor Pertambangan', key: 'pertambangan' }
+  { name: 'Potensi Pengembangan Sektor Perkebunan', key: ['perkebunan', 'kebun', 'tanaman tahunan'] },
+  { name: 'Potensi Pengembangan Sektor Permukiman/Perumahan', key: ['perumahan', 'permukiman', 'pemukiman', 'hunian'] },
+  { name: 'Potensi Pengembangan Sektor Industri', key: ['industri', 'pergudangan'] },
+  { name: 'Potensi Pengembangan Sektor Pertambangan', key: ['pertambangan', 'tambang', 'galian', 'mineral'] },
+  { name: 'Potensi Pengembangan Sektor Pariwisata', key: ['pariwisata', 'wisata', 'rekreasi'] }
 ];
 const COL_BAR = ['#ffc000', '#1f3864', '#70ad47', '#5b9bd5', '#ed7d31', '#a5a5a5', '#7030a0', '#00b0a0', '#c55a11', '#2e75b6', '#bf9000', '#548235', '#843c0c', '#44546a'];
 const PIE_COL = ['#70ad47', '#5b9bd5', '#ffc000', '#ed7d31', '#7030a0', '#00b0a0', '#2e75b6', '#bf9000', '#843c0c', '#44546a', '#a5a5a5', '#1f3864', '#c55a11', '#548235', '#ff9da7'];
@@ -319,12 +321,9 @@ const tdr = v => `<td class="n"><b>${fd(v)}</b></td>`;
 // ---------- IV-15 : Potensi Pertanian Pangan ----------
 function build15() {
   const mx = arahanMatrix(); if (!mx) return null;
-  const all = Object.keys(mx.m); let found = false;
-  const rows = ARAHAN_PANGAN.map(g => {
-    const names = all.filter(a => hasAll(a, g.key)); if (names.length) found = true;
-    const v = sumKec(mx, names); return { label: g.label, v, t: sumArr(v) };
-  });
-  if (!found) return null;
+  const names = Object.keys(mx.m).filter(isPangan).sort((x, y) => x.localeCompare(y));
+  if (!names.length) return null;
+  const rows = names.map(a => { const v = sumKec(mx, [a]); return { label: a, v, t: sumArr(v) } });
   const kt = mx.kecs.map((_, i) => rows.reduce((s, r) => s + r.v[i], 0));
   return { kecs: mx.kecs, rows, kt, T: sumArr(kt), wil: wilayah() };
 }
@@ -361,9 +360,9 @@ function excel15(wb, ws, d, ex) {
 function build16() {
   const mx = arahanMatrix(); if (!mx) return null;
   const all = Object.keys(mx.m), used = new Set(), groups = [];
-  all.forEach(a => { if (ARAHAN_PANGAN.some(g => hasAll(a, g.key))) used.add(a); });   // milik IV-15, jangan dobel
+  all.forEach(a => { if (isPangan(a)) used.add(a); });   // milik IV-15, jangan dobel
   SEKTOR_LAIN.forEach(s => {
-    const names = all.filter(a => !used.has(a) && norm(a).includes(s.key)).sort((x, y) => x.localeCompare(y));
+    const names = all.filter(a => !used.has(a) && s.key.some(k => norm(a).includes(k))).sort((x, y) => x.localeCompare(y));
     if (!names.length) return;
     names.forEach(a => used.add(a));
     const items = names.map(a => { const v = sumKec(mx, [a]); return { label: a, v, t: sumArr(v) }; });
