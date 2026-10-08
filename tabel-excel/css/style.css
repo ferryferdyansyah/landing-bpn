@@ -15,9 +15,18 @@ header small{display:block;font-size:12px;opacity:.8;font-weight:400;margin-top:
 #theme{margin-left:auto;width:36px;height:36px;padding:0;border-radius:8px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);font-size:16px;line-height:1}
 #theme:hover{background:rgba(255,255,255,.24)}
 main{padding:20px 24px;max-width:1500px;margin:auto}
-#drop{border:1.5px dashed var(--bd);border-radius:14px;background:var(--card);padding:24px;text-align:center;cursor:pointer;color:var(--mut);transition:border-color .15s,background .15s}
-#drop:hover,#drop.over{border-color:var(--acc);background:var(--card2)}
-#drop b{color:var(--tx);font-size:15px}
+#drop,
+#drop2{border:1.5px dashed var(--bd);border-radius:14px;background:var(--card);padding:24px;text-align:center;cursor:pointer;color:var(--mut);transition:border-color .15s,background .15s}
+#drop:hover,
+#drop.over,
+#drop2:hover,
+#drop2.over{border-color:var(--acc);background:var(--card2)}
+#drop b,
+#drop2 b{color:var(--tx);font-size:15px}
+#drop2 {
+    margin-top: 10px;
+    padding: 14px 24px
+}
 .bar{display:flex;gap:14px;align-items:center;margin:16px 0;flex-wrap:wrap}
 button{font-family:inherit;background:var(--acc);color:var(--acc-tx);border:0;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer}
 button:hover:not(:disabled){filter:brightness(1.08)}
