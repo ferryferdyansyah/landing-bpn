@@ -13,7 +13,6 @@ const nw = name => ({ kind: 'new', name });
 
 const SHEETS = [
   { kind: 'raw', name: '00_Raw_Data' },
-  nw('00_Pivot_Data'),
   { kind: 'extra', i: 16 },  // 01_Tabel_III-1 (Luas wilayah + penduduk manual)
   { kind: 'extra', i: 17 },  // 02_Tabel_III-2 (Penduduk, laju, rasio)
   { kind: 'extra', i: 18 },  // 03_Tabel_III-3 (Status Pekerjaan Utama)
